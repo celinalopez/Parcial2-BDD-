@@ -9,7 +9,6 @@ const fail = (res, error, status=400) => res.status(status).json({ success: fals
 /** Recalcula y guarda avgRating y ratingsCount en Product */
 const recomputeProductRating = async (productId) => {
   if (!mongoose.isValidObjectId(productId)) {
-    // si llega algo raro, no rompas la request principal
     return;
   }
 
@@ -47,7 +46,7 @@ export const createReview = async (req, res, next) => {
     const { product, rating, comment } = req.body;
     if (!product || !rating) return fail(res, 'product y rating son requeridos', 400);
 
-    // solo reseña quien compró
+    // solo reseña quien compro
     const allowed = await userBoughtProduct(req.user._id, product);
     if (!allowed) return fail(res, 'Solo pueden reseñar quienes compraron este producto', 403);
 
@@ -60,7 +59,7 @@ export const createReview = async (req, res, next) => {
 
     ok(res, populated, 201);
   } catch (e) {
-    // si choca con índice único (ya reseñó), mandamos mensaje claro
+    // SI YA EXISTE RESEÑA DEL USUARIO PARA ESE PRODUCTO
     if (e?.code === 11000) return fail(res, 'Ya existe una reseña tuya para este producto', 409);
     next(e);
   }
@@ -100,7 +99,7 @@ export const deleteReview = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-/** GET /api/resenas/product/:productId  (público) */
+/** GET /api/resenas/product/:productId  (publico) */
 export const listReviewsByProduct = async (req, res, next) => {
   try {
     const { productId } = req.params;
@@ -128,7 +127,7 @@ export const getMyReviewForProduct = async (req, res, next) => {
 };
 
 /** GET /api/resenas/top?limit=5
- *  TOP productos por promedio y cantidad de reseñas (agregaciones)
+ *  TOP productos por promedio y cantidad de reseñas AGREGACIONES
  */
 export const topProductsByReviews = async (req, res, next) => {
   try {

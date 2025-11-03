@@ -23,7 +23,7 @@ export const listCategories = async (_req, res, next) => {
 export const getCategory = async (req, res, next) => {
   try {
     const cat = await Category.findById(req.params.id);
-    if (!cat) return fail(res, 'Categoría no encontrada', 404);
+    if (!cat) return fail(res, 'Categoria no encontrada', 404);
     ok(res, cat);
   } catch (e) { next(e); }
 };
@@ -36,7 +36,7 @@ export const updateCategory = async (req, res, next) => {
       { ...(name && { name }), ...(description && { description }) },
       { new: true, runValidators: true }
     );
-    if (!cat) return fail(res, 'Categoría no encontrada', 404);
+    if (!cat) return fail(res, 'Categoria no encontrada', 404);
     ok(res, cat);
   } catch (e) { next(e); }
 };
@@ -44,7 +44,6 @@ export const updateCategory = async (req, res, next) => {
 export const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    // opcional: impedir borrar si tiene productos
     const count = await Product.countDocuments({ category: id });
     if (count > 0) return fail(res, 'No se puede eliminar: hay productos asociados', 409);
 
@@ -53,7 +52,7 @@ export const deleteCategory = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-// Agregación: cantidad de productos por categoría
+// AGREGACION cantidad de productos por categoria
 export const statsProductsByCategory = async (_req, res, next) => {
   try {
     const pipeline = [

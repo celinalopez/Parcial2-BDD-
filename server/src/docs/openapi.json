@@ -153,7 +153,7 @@
             "description": "OK"
           },
           "401": {
-            "description": "Credenciales inválidas"
+            "description": "Credenciales invalidas"
           }
         }
       }
@@ -213,8 +213,8 @@
         "tags": [
           "Usuarios"
         ],
-        "summary": "Agregar una dirección al usuario autenticado",
-        "description": "Utiliza $push para añadir una dirección al array de direcciones del usuario.",
+        "summary": "Agregar una direccion al usuario autenticado",
+        "description": "Utiliza $push para añadir una direccion al array de direcciones del usuario.",
         "security": [
           {
             "bearerAuth": []
@@ -254,7 +254,7 @@
         },
         "responses": {
           "200": {
-            "description": "Dirección agregada"
+            "description": "Direccion agregada"
           },
           "401": {
             "description": "No autorizado"
@@ -321,7 +321,7 @@
         "tags": [
           "Categorias"
         ],
-        "summary": "Listar categorías",
+        "summary": "Listar categorias",
         "responses": {
           "200": {
             "description": "OK"
@@ -332,7 +332,7 @@
         "tags": [
           "Categorias"
         ],
-        "summary": "Crear categoría (admin)",
+        "summary": "Crear categoria (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -354,7 +354,7 @@
                   },
                   "description": {
                     "type": "string",
-                    "example": "Equipos portátiles"
+                    "example": "Equipos portatiles"
                   }
                 }
               }
@@ -376,7 +376,7 @@
         "tags": [
           "Categorias"
         ],
-        "summary": "Stats: productos por categoría (admin)",
+        "summary": "Stats: productos por categoria (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -940,7 +940,7 @@
         "tags": [
           "Ordenes"
         ],
-        "summary": "Listar órdenes por usuario (owner/admin)",
+        "summary": "Listar ordenes por usuario (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1046,7 +1046,7 @@
         "tags": [
           "Ordenes"
         ],
-        "summary": "Estadísticas por estado (admin)",
+        "summary": "Estadisticas por estado (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1067,7 +1067,7 @@
         "tags": [
           "Ordenes"
         ],
-        "summary": "Alias de estadísticas por estado (admin)",
+        "summary": "Alias de estadisticas por estado (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1088,7 +1088,7 @@
         "tags": [
           "Ordenes"
         ],
-        "summary": "Estadísticas de productos vendidos ($unwind + $count) (admin)",
+        "summary": "Estadisticas de productos vendidos ($unwind + $count) (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1146,7 +1146,7 @@
         "tags": [
           "Resenas"
         ],
-        "summary": "Crear reseña (solo si compró)",
+        "summary": "Crear reseña (solo si compro)",
         "security": [
           {
             "bearerAuth": []
@@ -1184,7 +1184,7 @@
             "description": "Creada"
           },
           "403": {
-            "description": "Solo quien compró"
+            "description": "Solo quien compro"
           },
           "409": {
             "description": "Una por usuario-producto"
@@ -1269,7 +1269,7 @@
         "tags": [
           "Resenas"
         ],
-        "summary": "Listar reseñas por producto (público)",
+        "summary": "Listar reseñas por producto (publico)",
         "parameters": [
           {
             "in": "path",

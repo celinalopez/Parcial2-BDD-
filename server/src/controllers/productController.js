@@ -10,7 +10,7 @@ export const createProduct = async (req, res, next) => {
     const { name, description, brand, category, price, stock } = req.body;
     if (!name || !category || price == null) return fail(res, 'name, category y price son requeridos', 400);
     const cat = await Category.findById(category);
-    if (!cat) return fail(res, 'Categoría inválida', 400);
+    if (!cat) return fail(res, 'Categoria invalida', 400);
     const p = await Product.create({ name, description, brand, category, price, stock });
     ok(res, p, 201);
   } catch (e) { next(e); }
@@ -55,7 +55,7 @@ export const updateProduct = async (req, res, next) => {
 
     if (updates.category) {
       const cat = await Category.findById(updates.category);
-      if (!cat) return fail(res, 'Categoría inválida', 400);
+      if (!cat) return fail(res, 'Categoria invalida', 400);
     }
 
     const p = await Product.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
@@ -86,7 +86,7 @@ export const patchStock = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-// TOP más reseñados / mejor puntuados: ?limit=5
+// TOP mas reseñados / mejor puntuados: ?limit=5
 export const topReviewed = async (req, res, next) => {
   try {
     const limit = Number(req.query.limit) || 5;

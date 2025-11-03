@@ -9,7 +9,7 @@ const err = (res, error, status=400) => res.status(status).json({ success: false
  * POST /api/ordenes
  * Body: { "userId": "...", "paymentMethod": "card|cash|..." }
  * Requiere: usuario autenticado y owner/admin.
- * Crea la orden desde el carrito del usuario, descuenta stock y vacía el carrito.
+ * Crea la orden desde el carrito del usuario, descuenta stock y vacia el carrito.
  */
 export const createOrderFromCart = async (req, res, next) => {
   try {
@@ -19,7 +19,7 @@ export const createOrderFromCart = async (req, res, next) => {
     // 1) carrito
     const cart = await Cart.findOne({ user: userId });
     if (!cart || cart.items.length === 0) {
-      return res.status(409).json({ success: false, error: 'Carrito vacío' });
+      return res.status(409).json({ success: false, error: 'Carrito vacio' });
     }
 
     // 2) validar stock actual y preparar bulk por-documento
@@ -49,10 +49,10 @@ export const createOrderFromCart = async (req, res, next) => {
       return res.status(409).json({ success: false, error: `No se pudo crear la orden: ${stockErrors.join(', ')}` });
     }
     if (!items.length) {
-      return res.status(409).json({ success: false, error: 'No hay ítems válidos para la orden' });
+      return res.status(409).json({ success: false, error: 'No hay items validos para la orden' });
     }
 
-    // 3) descuento de stock (atómico por documento, pero sin transacción multi-doc)
+    // 3) descuento de stock
     if (bulk.length) await Product.bulkWrite(bulk);
 
     // 4) crear orden y vaciar carrito
@@ -123,13 +123,12 @@ export const getOrder = async (req, res, next) => {
 /**
  * PATCH /api/ordenes/:id/status (ADMIN)
  * Body: { "status": "paid|shipped|cancelled|pending" }
- * Si se cancela, opcionalmente podrías reponer stock (no se implementa aquí por simplicidad).
  */
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!['pending','paid','shipped','cancelled'].includes(status))
-      return err(res, 'status inválido', 400);
+      return err(res, 'status invalido', 400);
 
     const o = await Order.findByIdAndUpdate(
       req.params.id,
@@ -143,7 +142,7 @@ export const updateOrderStatus = async (req, res, next) => {
 
 /**
  * GET /api/ordenes/stats (ADMIN)
- * Agregación: cantidad de órdenes y total facturado por estado
+ * AGREGACION cantidad de ordenes y total facturado por estado
  */
 export const statsByStatus = async (_req, res, next) => {
   try {

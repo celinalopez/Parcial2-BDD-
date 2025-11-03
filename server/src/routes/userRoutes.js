@@ -15,7 +15,7 @@ import { protect, isAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
-// Públicas
+// Publicas
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 

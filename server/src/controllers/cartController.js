@@ -6,7 +6,7 @@ const fail = (res, error, status = 400) => res.status(status).json({ success: fa
 
 /**
  * GET /api/carrito/:userId
- * Devuelve el carrito del usuario (crea uno vacío si no existe)
+ * Devuelve el carrito del usuario (crea uno vacio si no existe)
  */
 export const getCart = async (req, res, next) => {
   try {
@@ -20,7 +20,7 @@ export const getCart = async (req, res, next) => {
 /**
  * POST /api/carrito/:userId/items
  * Body: { "productId": "...", "qty": 2 }
- * Agrega o incrementa un ítem. priceAtAdd se toma del producto en ese momento.
+ * Agrega o incrementa un item. priceAtAdd se toma del producto en ese momento.
  */
 export const addItem = async (req, res, next) => {
   try {
@@ -50,7 +50,7 @@ export const addItem = async (req, res, next) => {
 
 /**
  * PATCH /api/carrito/:userId/items/:productId
- * Body: { "qty": 3 } => setea cantidad exacta; si qty<=0, elimina
+ * Body: { "qty": 3 }  setea cantidad exacta si qty<=0, elimina
  */
 export const updateItemQty = async (req, res, next) => {
   try {
@@ -60,12 +60,11 @@ export const updateItemQty = async (req, res, next) => {
     if (!cart) return fail(res, 'Carrito no encontrado', 404);
 
     const idx = cart.items.findIndex(i => String(i.product) === String(productId));
-    if (idx < 0) return fail(res, 'Item no está en el carrito', 404);
+    if (idx < 0) return fail(res, 'Item no esta en el carrito', 404);
 
     if (!qty || qty <= 0) {
       cart.items.splice(idx, 1);
     } else {
-      // opcional validar stock actual si querés
       cart.items[idx].qty = qty;
     }
 

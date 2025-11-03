@@ -26,7 +26,7 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Método de instancia p/ comparar
+// Metodo de instancia para comparar
 UserSchema.methods.matchPassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };

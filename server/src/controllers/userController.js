@@ -31,10 +31,10 @@ export const loginUser = async (req, res, next) => {
     if (!email || !password) return fail(res, 'email y password son requeridos', 400);
 
     const user = await User.findOne({ email }).select('+password');
-    if (!user) return fail(res, 'Credenciales inválidas', 401);
+    if (!user) return fail(res, 'Credenciales invalidas', 401);
 
     const isMatch = await user.matchPassword(password);
-    if (!isMatch) return fail(res, 'Credenciales inválidas', 401);
+    if (!isMatch) return fail(res, 'Credenciales invalidas', 401);
 
     const token = signToken({ id: user._id, role: user.role });
 
@@ -53,11 +53,10 @@ export const getMe = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-// (Opcional) actualizar perfil propio
 export const updateMe = async (req, res, next) => {
   try {
     const updates = { name: req.body.name, phone: req.body.phone, addresses: req.body.addresses };
-    // si incluye password, volverá a hashear por pre('save')
+    // si incluye password volvera a hashear por presave
     const user = await User.findById(req.user._id).select('+password');
     if (!user) return fail(res, 'Usuario no encontrado', 404);
 
@@ -86,7 +85,7 @@ export const deleteUser = async (req, res, next) => {
     const u = await User.findById(id);
     if (!u) return fail(res, 'Usuario no encontrado', 404);
 
-    await Cart.deleteMany({ user: id }); // limpia carrito(s) del usuario
+    await Cart.deleteMany({ user: id }); // limpia carrito del usuario
     await User.findByIdAndDelete(id);
 
     return ok(res, { id }, 200);
@@ -110,7 +109,7 @@ export const updateUserById = async (req, res, next) => {
     const updates = {};
     for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
 
-    // Si viene password, lo tratamos aparte: usamos findById + save para disparar pre('save')
+    // Si viene password, lo tratamos aparte: usamos findById + save para disparar presave
     if ('password' in req.body) {
       const u = await User.findById(req.params.id).select('+password');
       if (!u) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
@@ -150,7 +149,7 @@ export const searchUsers = async (req, res, next) => {
 
 export const addAddress = async (req, res, next) => {
   try {
-    const { address } = req.body; // { street, city, ... }
+    const { address } = req.body; // address: { street, city, state, zip, country }
     const u = await User.findByIdAndUpdate(
       req.user._id,
       { $push: { addresses: address } },

@@ -23,7 +23,7 @@ router.patch('/:id/status', protect, isAdmin, updateOrderStatus);
 // Stats (admin)
 router.get('/stats/summary', protect, isAdmin, statsByStatus);
 
-router.get('/stats', protect, isAdmin, statsByStatus); // alias pedido por el PDF
+router.get('/stats', protect, isAdmin, statsByStatus); 
 
 router.get('/stats/items-sold', protect, isAdmin, statsItemsSold);
 

@@ -9,7 +9,7 @@ import { listAllReviews } from '../controllers/reviewController.js';
 
 const router = Router();
 
-// públicas
+// publicas
 router.get('/product/:productId', listReviewsByProduct);
 router.get('/top', topProductsByReviews);
 
@@ -18,6 +18,6 @@ router.get('/me/product/:productId', protect, getMyReviewForProduct);
 router.post('/', protect, createReview);
 router.patch('/:id', protect, updateReview);
 router.delete('/:id', protect, deleteReview);
-router.get('/', listAllReviews); // ruta pedida en el PDF
+router.get('/', listAllReviews);  
 
 export default router;

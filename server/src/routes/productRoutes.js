@@ -8,7 +8,7 @@ import { protect, isAdmin } from '../middlewares/auth.js';
 
 const router = Router();
 
-// públicas
+// publicas
 router.get('/', listProducts);
 router.get('/top', topReviewed);
 router.get('/:id', getProduct);
@@ -19,6 +19,6 @@ router.patch('/:id', protect, isAdmin, updateProduct);
 router.delete('/:id', protect, isAdmin, deleteProduct);
 router.patch('/:id/stock', protect, isAdmin, patchStock);
 
-router.get('/filtro', listProducts); // alias pedido por el PDF
+router.get('/filtro', listProducts); 
 
 export default router;
