@@ -57,7 +57,7 @@ npm install
 ### 2) Variables de entorno (`server/.env`)
 ```
 PORT=4000
-MONGO_URI=mongodb://127.0.0.1:27017/mern_ecom
+MONGO_URI=mongodb://127.0.0.1:27017/parcial2_bdd
 JWT_SECRET=supersecret
 JWT_EXPIRES_IN=1d
 ```
