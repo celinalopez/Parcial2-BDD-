@@ -24,3 +24,12 @@ export const isAdmin = (req, res, next) => {
   }
   next();
 };
+
+export const ownerOrAdmin = (paramName = 'userId') => (req, res, next) => {
+  const isOwner = String(req.user?._id) === String(req.params[paramName]);
+  const isAdmin = req.user?.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ success: false, error: 'Owner or admin only' });
+  }
+  next();
+};

@@ -7,6 +7,7 @@ import { notFound, errorHandler } from './middlewares/error.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
 
 const app = express();
 app.use(cors());
@@ -24,6 +25,7 @@ app.get('/api/health', (_req, res) => res.json({ success: true, message: 'OK' })
 app.use('/api/usuarios', userRoutes);
 app.use('/api/categorias', categoryRoutes);
 app.use('/api/productos', productRoutes);
+app.use('/api/carrito', cartRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
