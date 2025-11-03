@@ -9,6 +9,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 app.use(cors());
@@ -28,6 +29,7 @@ app.use('/api/categorias', categoryRoutes);
 app.use('/api/productos', productRoutes);
 app.use('/api/carrito', cartRoutes);
 app.use('/api/ordenes', orderRoutes);
+app.use('/api/resenas', reviewRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
