@@ -5,6 +5,8 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import { notFound, errorHandler } from './middlewares/error.js';
 import userRoutes from './routes/userRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 const app = express();
 app.use(cors());
@@ -20,6 +22,8 @@ app.get('/api/health', (_req, res) => res.json({ success: true, message: 'OK' })
 
 // monta rutas ANTES de notFound
 app.use('/api/usuarios', userRoutes);
+app.use('/api/categorias', categoryRoutes);
+app.use('/api/productos', productRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
