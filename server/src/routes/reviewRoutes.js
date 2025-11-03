@@ -5,6 +5,7 @@ import {
   topProductsByReviews
 } from '../controllers/reviewController.js';
 import { protect } from '../middlewares/auth.js';
+import { listAllReviews } from '../controllers/reviewController.js';
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.get('/me/product/:productId', protect, getMyReviewForProduct);
 router.post('/', protect, createReview);
 router.patch('/:id', protect, updateReview);
 router.delete('/:id', protect, deleteReview);
+router.get('/', listAllReviews); // ruta pedida en el PDF
 
 export default router;

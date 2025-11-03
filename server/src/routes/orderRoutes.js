@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
   createOrderFromCart, listOrders, listOrdersByUser, getOrder,
-  updateOrderStatus, statsByStatus
+  updateOrderStatus, statsByStatus, statsItemsSold
 } from '../controllers/orderController.js';
 import { protect, isAdmin, ownerOrAdmin } from '../middlewares/auth.js';
 
@@ -22,5 +22,9 @@ router.patch('/:id/status', protect, isAdmin, updateOrderStatus);
 
 // Stats (admin)
 router.get('/stats/summary', protect, isAdmin, statsByStatus);
+
+router.get('/stats', protect, isAdmin, statsByStatus); // alias pedido por el PDF
+
+router.get('/stats/items-sold', protect, isAdmin, statsItemsSold);
 
 export default router;

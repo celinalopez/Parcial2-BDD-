@@ -160,3 +160,20 @@ export const statsByStatus = async (_req, res, next) => {
     ok(res, stats);
   } catch (e) { next(e); }
 };
+
+export const statsItemsSold = async (_req, res, next) => {
+  try {
+    const pipeline = [
+      { $match: { status: { $ne: 'cancelled' } } },
+      { $unwind: '$items' },
+      { $group: {
+          _id: '$items.product',
+          unitsSold: { $sum: '$items.qty' },
+          ordersCount: { $count: {} } // cuenta documentos en el grupo
+      }},
+      { $sort: { unitsSold: -1 } }
+    ];
+    const rows = await Order.aggregate(pipeline);
+    res.json({ success: true, data: rows });
+  } catch (e) { next(e); }
+};

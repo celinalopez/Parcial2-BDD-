@@ -149,3 +149,20 @@ export const topProductsByReviews = async (req, res, next) => {
     ok(res, top);
   } catch (e) { next(e); }
 };
+
+
+export const listAllReviews = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const [items, total] = await Promise.all([
+      Review.find()
+        .populate('user', 'name email')
+        .populate('product', 'name brand')
+        .sort({ createdAt: -1 })
+        .skip(skip).limit(Number(limit)),
+      Review.countDocuments()
+    ]);
+    res.status(200).json({ success: true, data: { items, page: Number(page), limit: Number(limit), total } });
+  } catch (e) { next(e); }
+};

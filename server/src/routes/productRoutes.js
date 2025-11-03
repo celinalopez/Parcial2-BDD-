@@ -5,6 +5,7 @@ import {
 } from '../controllers/productController.js';
 import { protect, isAdmin } from '../middlewares/auth.js';
 
+
 const router = Router();
 
 // públicas
@@ -17,5 +18,7 @@ router.post('/', protect, isAdmin, createProduct);
 router.patch('/:id', protect, isAdmin, updateProduct);
 router.delete('/:id', protect, isAdmin, deleteProduct);
 router.patch('/:id/stock', protect, isAdmin, patchStock);
+
+router.get('/filtro', listProducts); // alias pedido por el PDF
 
 export default router;

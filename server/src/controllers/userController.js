@@ -131,21 +131,31 @@ export const updateUserById = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-// (Opcional) Búsqueda paginada por query (ADMIN) ?q=texto&page=1&limit=10
+// Buscar usuarios por nombre o email (ADMIN)
 export const searchUsers = async (req, res, next) => {
   try {
-    const { q = '', page = 1, limit = 10 } = req.query;
-    const filter = q
-      ? { $or: [{ name: new RegExp(q, 'i') }, { email: new RegExp(q, 'i') }] }
-      : {};
-    const skip = (Number(page) - 1) * Number(limit);
-    const [items, total] = await Promise.all([
-      User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      User.countDocuments(filter)
-    ]);
-    return res.status(200).json({
-      success: true,
-      data: { items, page: Number(page), limit: Number(limit), total }
-    });
+    const { q } = req.query;
+    const filter = q ? {
+      $and: [
+        { $or: [
+          { name:  { $regex: q, $options: 'i' } },
+          { email: { $regex: q, $options: 'i' } }
+        ] }
+      ]
+    } : {};
+    const users = await User.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, data: users });
+  } catch (e) { next(e); }
+};
+
+export const addAddress = async (req, res, next) => {
+  try {
+    const { address } = req.body; // { street, city, ... }
+    const u = await User.findByIdAndUpdate(
+      req.user._id,
+      { $push: { addresses: address } },
+      { new: true, runValidators: true }
+    );
+    res.json({ success: true, data: u });
   } catch (e) { next(e); }
 };
