@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed": "node scripts/seed.mjs",
+    "seed:reset": "node scripts/seed.mjs --reset"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.2",
     "morgan": "^1.10.1",
+    "swagger-ui-express": "^5.0.1",
     "yargs": "^18.0.0"
   },
   "devDependencies": {

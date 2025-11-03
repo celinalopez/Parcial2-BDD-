@@ -10,18 +10,31 @@ import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import fs from 'fs';
+import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import { fileURLToPath } from 'url';
+
+//Swagger setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const swaggerDoc = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'docs', 'openapi.json'), 'utf-8')
+);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// opcional: logger de rutas para debug
+// logger de rutas para debug
 app.use((req, _res, next) => { console.log(`${req.method} ${req.url}`); next(); });
+//logger de rutas swagger
+app.get('/docs.json', (_req, res) => res.json(swaggerDoc));
 
-// home y health
-app.get('/', (_req, res) => res.json({ success: true, message: 'API Parcial2-BDD corriendo', docs: '/api/health' }));
-app.get('/api/health', (_req, res) => res.json({ success: true, message: 'OK' }));
+// home 
+app.get('/', (_req, res) => res.json({ success: true, message: 'API Parcial2-BDD corriendo', docs: '/api/home' }));
+app.get('/api/home', (_req, res) => res.json({ success: true, message: 'OK' }));
 
 // monta rutas ANTES de notFound
 app.use('/api/usuarios', userRoutes);
@@ -31,6 +44,16 @@ app.use('/api/carrito', cartRoutes);
 app.use('/api/ordenes', orderRoutes);
 app.use('/api/resenas', reviewRoutes);
 
+//Swagger setup
+app.use(
+  '/docs',
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    explorer: true,
+    swaggerOptions: { url: '/docs.json' }
+  })
+);
+
 app.use(notFound);
 app.use(errorHandler);
 
@@ -38,3 +61,4 @@ const { PORT = 4000, MONGO_URI } = process.env;
 mongoose.connect(MONGO_URI).then(() => {
   app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));
 });
+
