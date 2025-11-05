@@ -28,12 +28,6 @@ Parcial2-API/
 │   ├── .env
 │   ├── package.json
 │   ├── nodemon.json
-│   ├── data/
-│   │   ├── users.json
-│   │   ├── categories.json
-│   │   └── products.json
-│   ├── scripts/
-│   │   └── seed.mjs
 │   └── src/
 │       ├── index.js
 │       ├── models/ (User, Category, Product, Cart, Order, Review)
@@ -68,43 +62,6 @@ JWT_EXPIRES_IN=1d
 ```bash
 npm run dev
 # http://localhost:4000/api/health  ->  { "success": true, "message": "OK" }
-```
-
----
-
-## 🌱 Seed de datos (Yargs + File System)
-
-El script `scripts/seed.mjs` demuestra **File System (fs)**, **Yargs**, **dotenv** y **Mongoose** leyendo JSON desde `/data` y cargando usuarios, categorías y productos.
-
-### Archivos de datos
-- `server/data/users.json`
-- `server/data/categories.json`
-- `server/data/products.json`
-
-### Comandos
-Desde `server/`:
-```bash
-# Insertar todo (users, categories, products)
-node scripts/seed.mjs
-
-# Vaciar colecciones y volver a insertar
-node scripts/seed.mjs --reset
-
-# Insertar solo una colección
-node scripts/seed.mjs --only=users
-node scripts/seed.mjs --only=categories
-node scripts/seed.mjs --only=products
-```
-
-### Salida esperada
-```
-✅ Conectado a MongoDB
-🗑️ Colecciones vaciadas         # si usás --reset
-👤 2 usuarios insertados
-📂 2 categorías insertadas
-📦 2 productos insertados
-🌱 Seed completado con éxito
-🔌 Desconectado de MongoDB
 ```
 
 ---
