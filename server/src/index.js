@@ -19,7 +19,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const swaggerDoc = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'docs', 'openapi.json'), 'utf-8')
+  fs.readFileSync(path.join(__dirname, 'swagger', 'openapi.json'), 'utf-8')
 );
 
 const app = express();
@@ -30,7 +30,7 @@ app.use(morgan('dev'));
 // logger de rutas para debug
 app.use((req, _res, next) => { console.log(`${req.method} ${req.url}`); next(); });
 //logger de rutas swagger
-app.get('/docs.json', (_req, res) => res.json(swaggerDoc));
+app.get('/swagger.json', (_req, res) => res.json(swaggerDoc));
 
 // home 
 app.get('/', (_req, res) => res.json({ success: true, message: 'API Parcial2-BDD corriendo', docs: '/api/home' }));
@@ -46,11 +46,11 @@ app.use('/api/reviews', reviewRoutes);
 
 //Swagger setup
 app.use(
-  '/docs',
+  '/swagger',
   swaggerUi.serve,
   swaggerUi.setup(null, {
     explorer: true,
-    swaggerOptions: { url: '/docs.json' }
+    swaggerOptions: { url: '/swagger.json' }
   })
 );
 
