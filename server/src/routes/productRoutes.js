@@ -1,24 +1,31 @@
 import { Router } from 'express';
 import {
-  createProduct, listProducts, getProduct,
-  updateProduct, deleteProduct, patchStock, topReviewed
+  listProducts,
+  filterProducts,
+  topProducts,
+  createProduct,
+  getProduct,
+  updateProduct,
+  deleteProduct,
+  patchStock,
 } from '../controllers/productController.js';
 import { protect, isAdmin } from '../middlewares/auth.js';
-
+import { validateObjectIdParam } from '../middlewares/validators.js';
 
 const router = Router();
 
-// publicas
-router.get('/', listProducts);
-router.get('/top', topReviewed);
-router.get('/:id', getProduct);
+// públicas
+router.get('/', listProducts);                                      // GET    /api/products
+router.get('/filter', filterProducts);                               // GET    /api/products/filter
+router.get('/top', topProducts);                                     // GET    /api/products/top
+
+// detalle público
+router.get('/:id', validateObjectIdParam('id'), getProduct);         // GET    /api/products/:id
 
 // admin
-router.post('/', protect, isAdmin, createProduct);
-router.patch('/:id', protect, isAdmin, updateProduct);
-router.delete('/:id', protect, isAdmin, deleteProduct);
-router.patch('/:id/stock', protect, isAdmin, patchStock);
-
-router.get('/filtro', listProducts); 
+router.post('/', protect, isAdmin, createProduct);                   // POST   /api/products
+router.patch('/:id', protect, isAdmin, validateObjectIdParam('id'), updateProduct);      // PATCH  /api/products/:id
+router.delete('/:id', protect, isAdmin, validateObjectIdParam('id'), deleteProduct);     // DELETE /api/products/:id
+router.patch('/:id/stock', protect, isAdmin, validateObjectIdParam('id'), patchStock);   // PATCH  /api/products/:id/stock
 
 export default router;

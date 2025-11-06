@@ -1,126 +1,101 @@
+import mongoose from 'mongoose';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 
 const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
 const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
 
-/**
- * GET /api/carrito/:userId
- * Devuelve el carrito del usuario (crea uno vacio si no existe)
- */
+// Asegura que el usuario tenga un carrito, si no lo tiene lo crea
+const ensureCart = async (userId) => {
+  let cart = await Cart.findOne({ user: userId });
+  if (!cart) cart = await Cart.create({ user: userId, items: [] });
+  return cart;
+};
+
+// GET /api/cart/:userId con productos
 export const getCart = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    let cart = await Cart.findOne({ user: userId }).populate('items.product', 'name brand price stock');
-    if (!cart) cart = await Cart.create({ user: userId, items: [] });
+    const user = req.params.userId;
+    const cart = await ensureCart(user);
+    await cart.populate('items.product', 'name brand price stock');
     ok(res, cart);
   } catch (e) { next(e); }
 };
 
-/**
- * POST /api/carrito/:userId/items
- * Body: { "productId": "...", "qty": 2 }
- * Agrega o incrementa un item. priceAtAdd se toma del producto en ese momento.
- */
+// POST /api/cart/:userId/items  agregar o incrementar 
 export const addItem = async (req, res, next) => {
   try {
-    const { userId } = req.params;
     const { productId, qty } = req.body;
-    if (!productId || !qty || qty <= 0) return fail(res, 'productId y qty>0 requeridos', 400);
-
-    const product = await Product.findById(productId).select('price stock');
+    const product = await Product.findById(productId);
     if (!product) return fail(res, 'Producto no encontrado', 404);
-    if (product.stock < qty) return fail(res, 'Stock insuficiente', 409);
+    if (qty <= 0) return fail(res, 'qty > 0', 400);
 
-    let cart = await Cart.findOne({ user: userId });
-    if (!cart) cart = await Cart.create({ user: userId, items: [] });
-
+    const cart = await ensureCart(req.params.userId);
     const idx = cart.items.findIndex(i => String(i.product) === String(productId));
-    if (idx >= 0) {
-      cart.items[idx].qty += qty;
-    } else {
-      cart.items.push({ product: productId, qty, priceAtAdd: product.price });
-    }
+    if (idx >= 0) cart.items[idx].qty += qty;
+    else cart.items.push({ product: productId, qty, priceAtAdd: product.price });
 
     await cart.save();
-    cart = await cart.populate('items.product', 'name brand price stock');
+    await cart.populate('items.product', 'name brand price stock');
     ok(res, cart, 201);
   } catch (e) { next(e); }
 };
 
-/**
- * PATCH /api/carrito/:userId/items/:productId
- * Body: { "qty": 3 }  setea cantidad exacta si qty<=0, elimina
- */
+// PATCH /api/cart/:userId/items/:productId  actualiza cantidad o elimina si qty<=0
 export const updateItemQty = async (req, res, next) => {
   try {
-    const { userId, productId } = req.params;
     const { qty } = req.body;
-    let cart = await Cart.findOne({ user: userId });
-    if (!cart) return fail(res, 'Carrito no encontrado', 404);
+    const cart = await ensureCart(req.params.userId);
+    const idx = cart.items.findIndex(i => String(i.product) === String(req.params.productId));
+    if (idx < 0) return fail(res, 'Item no está en el cart', 404);
 
-    const idx = cart.items.findIndex(i => String(i.product) === String(productId));
-    if (idx < 0) return fail(res, 'Item no esta en el carrito', 404);
-
-    if (!qty || qty <= 0) {
-      cart.items.splice(idx, 1);
-    } else {
-      cart.items[idx].qty = qty;
-    }
+    if (qty <= 0) cart.items.splice(idx, 1);
+    else cart.items[idx].qty = qty;
 
     await cart.save();
-    cart = await cart.populate('items.product', 'name brand price stock');
+    await cart.populate('items.product', 'name brand price stock');
     ok(res, cart);
   } catch (e) { next(e); }
 };
 
-/**
- * DELETE /api/carrito/:userId/items/:productId
- */
+// DELETE /api/cart/:userId/items/:productId 
 export const removeItem = async (req, res, next) => {
   try {
-    const { userId, productId } = req.params;
-    const cart = await Cart.findOneAndUpdate(
-      { user: userId },
-      { $pull: { items: { product: productId } } },
-      { new: true }
-    ).populate('items.product', 'name brand price stock');
-
-    if (!cart) return fail(res, 'Carrito no encontrado', 404);
+    const cart = await ensureCart(req.params.userId);
+    cart.items = cart.items.filter(i => String(i.product) !== String(req.params.productId));
+    await cart.save();
     ok(res, cart);
   } catch (e) { next(e); }
 };
 
-/**
- * DELETE /api/carrito/:userId
- * Vaciar carrito
- */
+// DELETE /api/cart/:userId  vaciar el carrito
 export const clearCart = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const cart = await Cart.findOneAndUpdate(
-      { user: userId },
-      { $set: { items: [] } },
-      { new: true }
-    );
-    if (!cart) return fail(res, 'Carrito no encontrado', 404);
-    ok(res, cart);
+    await Cart.updateOne({ user: req.params.userId }, { $set: { items: [] } });
+    ok(res, { emptied: true });
   } catch (e) { next(e); }
 };
 
-/**
- * GET /api/carrito/:userId/total
- * Calcula subtotal/total en base a priceAtAdd * qty
- */
-export const getTotals = async (req, res, next) => {
+// GET /api/cart/:userId/total  subtotal y total con agregacion 
+export const getCartTotals = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart) return ok(res, { subtotal: 0, itemsCount: 0 });
+    const user = new mongoose.Types.ObjectId(req.params.userId);
 
-    const subtotal = cart.items.reduce((acc, it) => acc + (it.qty * it.priceAtAdd), 0);
-    const itemsCount = cart.items.reduce((acc, it) => acc + it.qty, 0);
+    const pipeline = [
+      { $match: { user } },
+      { $unwind: '$items' },
+      { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'p' } },
+      { $unwind: '$p' },
+      { $project: {
+          qty: '$items.qty',
+          price: { $ifNull: ['$items.priceAtAdd', '$p.price'] },
+          subtotal: { $multiply: ['$items.qty', { $ifNull: ['$items.priceAtAdd', '$p.price'] }] }
+      }},
+      { $group: { _id: null, itemsCount: { $sum: '$qty' }, subtotal: { $sum: '$subtotal' } } }
+    ];
 
-    ok(res, { subtotal, itemsCount });
+    const rows = await Cart.aggregate(pipeline);
+    const totals = rows[0] || { itemsCount: 0, subtotal: 0 };
+    ok(res, totals);
   } catch (e) { next(e); }
 };

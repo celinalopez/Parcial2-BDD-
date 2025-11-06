@@ -1,23 +1,27 @@
 import { Router } from 'express';
 import {
-  createReview, updateReview, deleteReview,
-  listReviewsByProduct, getMyReviewForProduct,
-  topProductsByReviews
+  listAllReviews,
+  listReviewsByProduct,
+  topProductsByReviews,
+  createReview,
+  updateReview,
+  deleteReview,
 } from '../controllers/reviewController.js';
-import { protect } from '../middlewares/auth.js';
-import { listAllReviews } from '../controllers/reviewController.js';
+import { protect, isAdmin } from '../middlewares/auth.js';
+import { validateObjectIdParam } from '../middlewares/validators.js';
 
 const router = Router();
 
-// publicas
-router.get('/product/:productId', listReviewsByProduct);
-router.get('/top', topProductsByReviews);
+// admin: listar todas con populate
+router.get('/', protect, isAdmin, listAllReviews);                               // GET    /api/reviews
 
-// autenticadas
-router.get('/me/product/:productId', protect, getMyReviewForProduct);
-router.post('/', protect, createReview);
-router.patch('/:id', protect, updateReview);
-router.delete('/:id', protect, deleteReview);
-router.get('/', listAllReviews);  
+// público
+router.get('/product/:productId', validateObjectIdParam('productId'), listReviewsByProduct); // GET /api/reviews/product/:productId
+router.get('/top', topProductsByReviews);                                        // GET    /api/reviews/top
+
+// autenticado
+router.post('/', protect, createReview);                                         // POST   /api/reviews
+router.patch('/:id', protect, validateObjectIdParam('id'), updateReview);        // PATCH  /api/reviews/:id
+router.delete('/:id', protect, validateObjectIdParam('id'), deleteReview);       // DELETE /api/reviews/:id
 
 export default router;

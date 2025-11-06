@@ -5,8 +5,8 @@ import morgan from 'morgan';
 import mongoose from 'mongoose';
 import { notFound, errorHandler } from './middlewares/error.js';
 import userRoutes from './routes/userRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
@@ -37,12 +37,12 @@ app.get('/', (_req, res) => res.json({ success: true, message: 'API Parcial2-BDD
 app.get('/api/home', (_req, res) => res.json({ success: true, message: 'OK' }));
 
 // monta rutas ANTES de notFound
-app.use('/api/usuarios', userRoutes);
-app.use('/api/categorias', categoryRoutes);
-app.use('/api/productos', productRoutes);
-app.use('/api/carrito', cartRoutes);
-app.use('/api/ordenes', orderRoutes);
-app.use('/api/resenas', reviewRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 //Swagger setup
 app.use(

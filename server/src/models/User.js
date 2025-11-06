@@ -1,34 +1,28 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const AddressSchema = new mongoose.Schema({
-  street: String,
-  city: String,
-  state: String,
-  zip: String,
-  country: String,
-}, { _id: false });
-
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true, minlength: 2 },
-  email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
-  password: { type: String, required: true, minlength: 6, select: false }, // select:false para no devolverla por defecto
-  role: { type: String, enum: ['client','admin'], default: 'client' },
-  phone: String,
-  addresses: [AddressSchema],
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true, unique: true, lowercase: true },
+  password: { type: String, required: true, minlength: 6, select: false },
+  role: { type: String, enum: ['client', 'admin'], default: 'client' },
+  phone: { type: String, trim: true },
+  addresses: [{
+    street: String,
+    city: String,
+    country: String
+  }]
 }, { timestamps: true });
 
-// Hash antes de guardar si fue modificada
-UserSchema.pre('save', async function (next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Metodo de instancia para comparar
-UserSchema.methods.matchPassword = function (candidate) {
+userSchema.methods.comparePassword = function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model('User', userSchema);

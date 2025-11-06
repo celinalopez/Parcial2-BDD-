@@ -25,7 +25,7 @@
       "name": "Health"
     },
     {
-      "name": "Usuarios"
+      "name": "users"
     },
     {
       "name": "Categorias"
@@ -72,10 +72,10 @@
         }
       }
     },
-    "/api/usuarios/register": {
+    "/api/users/register": {
       "post": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
         "summary": "Registro",
         "requestBody": {
@@ -118,10 +118,10 @@
         }
       }
     },
-    "/api/usuarios/login": {
+    "/api/users/login": {
       "post": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
         "summary": "Login",
         "requestBody": {
@@ -158,10 +158,10 @@
         }
       }
     },
-    "/api/usuarios/me": {
+    "/api/users/me": {
       "get": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
         "summary": "Perfil propio",
         "security": [
@@ -180,7 +180,7 @@
       },
       "patch": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
         "summary": "Actualizar perfil propio",
         "security": [
@@ -208,13 +208,13 @@
         }
       }
     },
-    "/api/usuarios/me/address": {
+    "/api/users/me/address": {
       "post": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
-        "summary": "Agregar una direccion al usuario autenticado",
-        "description": "Utiliza $push para añadir una direccion al array de direcciones del usuario.",
+        "summary": "Agregar una direccion al user autenticado",
+        "description": "Utiliza $push para añadir una direccion al array de direcciones del user.",
         "security": [
           {
             "bearerAuth": []
@@ -262,12 +262,12 @@
         }
       }
     },
-    "/api/usuarios": {
+    "/api/users": {
       "get": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
-        "summary": "Listar usuarios (admin)",
+        "summary": "Listar users (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -283,12 +283,12 @@
         }
       }
     },
-    "/api/usuarios/search": {
+    "/api/users/search": {
       "get": {
         "tags": [
-          "Usuarios"
+          "users"
         ],
-        "summary": "Buscar usuarios (admin)",
+        "summary": "Buscar users (admin)",
         "description": "Busca usando $or y $and en name/email.",
         "security": [
           {
@@ -316,12 +316,12 @@
         }
       }
     },
-    "/api/categorias": {
+    "/api/categories": {
       "get": {
         "tags": [
           "Categorias"
         ],
-        "summary": "Listar categorias",
+        "summary": "Listar categories",
         "responses": {
           "200": {
             "description": "OK"
@@ -332,7 +332,7 @@
         "tags": [
           "Categorias"
         ],
-        "summary": "Crear categoria (admin)",
+        "summary": "Crear category (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -371,12 +371,12 @@
         }
       }
     },
-    "/api/categorias/stats": {
+    "/api/categories/stats": {
       "get": {
         "tags": [
           "Categorias"
         ],
-        "summary": "Stats: productos por categoria (admin)",
+        "summary": "Stats: products por category (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -392,12 +392,12 @@
         }
       }
     },
-    "/api/productos": {
+    "/api/products": {
       "get": {
         "tags": [
           "Productos"
         ],
-        "summary": "Listar productos (filtros)",
+        "summary": "Listar products (filtros)",
         "parameters": [
           {
             "in": "query",
@@ -461,7 +461,7 @@
         "tags": [
           "Productos"
         ],
-        "summary": "Crear producto (admin)",
+        "summary": "Crear product (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -514,13 +514,13 @@
         }
       }
     },
-    "/api/productos/filtro": {
+    "/api/products/filtro": {
       "get": {
         "tags": [
           "Productos"
         ],
-        "summary": "Alias de listado de productos con filtros",
-        "description": "Devuelve lo mismo que /api/productos con query params.",
+        "summary": "Alias de listado de products con filtros",
+        "description": "Devuelve lo mismo que /api/products con query params.",
         "parameters": [
           {
             "in": "query",
@@ -581,12 +581,12 @@
         }
       }
     },
-    "/api/productos/top": {
+    "/api/products/top": {
       "get": {
         "tags": [
           "Productos"
         ],
-        "summary": "Top reseñados / mejor rating",
+        "summary": "Top reviewdos / mejor rating",
         "parameters": [
           {
             "in": "query",
@@ -604,7 +604,7 @@
         }
       }
     },
-    "/api/productos/{id}/stock": {
+    "/api/products/{id}/stock": {
       "patch": {
         "tags": [
           "Productos"
@@ -653,12 +653,12 @@
         }
       }
     },
-    "/api/carrito/{userId}": {
+    "/api/cart/{userId}": {
       "get": {
         "tags": [
           "Carrito"
         ],
-        "summary": "Obtener carrito (owner/admin)",
+        "summary": "Obtener cart (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -687,7 +687,7 @@
         "tags": [
           "Carrito"
         ],
-        "summary": "Vaciar carrito (owner/admin)",
+        "summary": "Vaciar cart (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -710,7 +710,7 @@
         }
       }
     },
-    "/api/carrito/{userId}/total": {
+    "/api/cart/{userId}/total": {
       "get": {
         "tags": [
           "Carrito"
@@ -738,12 +738,12 @@
         }
       }
     },
-    "/api/carrito/{userId}/items": {
+    "/api/cart/{userId}/items": {
       "post": {
         "tags": [
           "Carrito"
         ],
-        "summary": "Agregar item al carrito (owner/admin)",
+        "summary": "Agregar item al cart (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -791,7 +791,7 @@
         }
       }
     },
-    "/api/carrito/{userId}/items/{productId}": {
+    "/api/cart/{userId}/items/{productId}": {
       "patch": {
         "tags": [
           "Carrito"
@@ -848,7 +848,7 @@
         "tags": [
           "Carrito"
         ],
-        "summary": "Eliminar item del carrito (owner/admin)",
+        "summary": "Eliminar item del cart (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -879,12 +879,12 @@
         }
       }
     },
-    "/api/ordenes": {
+    "/api/orders": {
       "post": {
         "tags": [
           "Ordenes"
         ],
-        "summary": "Crear orden desde carrito (owner/admin)",
+        "summary": "Crear orden desde cart (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -935,12 +935,12 @@
         }
       }
     },
-    "/api/ordenes/user/{userId}": {
+    "/api/orders/user/{userId}": {
       "get": {
         "tags": [
           "Ordenes"
         ],
-        "summary": "Listar ordenes por usuario (owner/admin)",
+        "summary": "Listar orders por user (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -963,7 +963,7 @@
         }
       }
     },
-    "/api/ordenes/{id}": {
+    "/api/orders/{id}": {
       "get": {
         "tags": [
           "Ordenes"
@@ -991,7 +991,7 @@
         }
       }
     },
-    "/api/ordenes/{id}/status": {
+    "/api/orders/{id}/status": {
       "patch": {
         "tags": [
           "Ordenes"
@@ -1041,7 +1041,7 @@
         }
       }
     },
-    "/api/ordenes/stats": {
+    "/api/orders/stats": {
       "get": {
         "tags": [
           "Ordenes"
@@ -1062,7 +1062,7 @@
         }
       }
     },
-    "/api/ordenes/stats/summary": {
+    "/api/orders/stats/summary": {
       "get": {
         "tags": [
           "Ordenes"
@@ -1083,12 +1083,12 @@
         }
       }
     },
-    "/api/ordenes/stats/items-sold": {
+    "/api/orders/stats/items-sold": {
       "get": {
         "tags": [
           "Ordenes"
         ],
-        "summary": "Estadisticas de productos vendidos ($unwind + $count) (admin)",
+        "summary": "Estadisticas de products vendidos ($unwind + $count) (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1104,12 +1104,12 @@
         }
       }
     },
-    "/api/resenas": {
+    "/api/reviews": {
       "get": {
         "tags": [
           "Resenas"
         ],
-        "summary": "Listar todas las reseñas (admin)",
+        "summary": "Listar todas las reviews (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1146,7 +1146,7 @@
         "tags": [
           "Resenas"
         ],
-        "summary": "Crear reseña (solo si compro)",
+        "summary": "Crear review (solo si compro)",
         "security": [
           {
             "bearerAuth": []
@@ -1187,17 +1187,17 @@
             "description": "Solo quien compro"
           },
           "409": {
-            "description": "Una por usuario-producto"
+            "description": "Una por user-product"
           }
         }
       }
     },
-    "/api/resenas/{id}": {
+    "/api/reviews/{id}": {
       "patch": {
         "tags": [
           "Resenas"
         ],
-        "summary": "Actualizar reseña (owner/admin)",
+        "summary": "Actualizar review (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1241,7 +1241,7 @@
         "tags": [
           "Resenas"
         ],
-        "summary": "Eliminar reseña (owner/admin)",
+        "summary": "Eliminar review (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1264,12 +1264,12 @@
         }
       }
     },
-    "/api/resenas/product/{productId}": {
+    "/api/reviews/product/{productId}": {
       "get": {
         "tags": [
           "Resenas"
         ],
-        "summary": "Listar reseñas por producto (publico)",
+        "summary": "Listar reviews por product (publico)",
         "parameters": [
           {
             "in": "path",
@@ -1303,12 +1303,12 @@
         }
       }
     },
-    "/api/resenas/me/product/{productId}": {
+    "/api/reviews/me/product/{productId}": {
       "get": {
         "tags": [
           "Resenas"
         ],
-        "summary": "Ver mi reseña para un producto (owner)",
+        "summary": "Ver mi review para un product (owner)",
         "security": [
           {
             "bearerAuth": []
@@ -1331,12 +1331,12 @@
         }
       }
     },
-    "/api/resenas/top": {
+    "/api/reviews/top": {
       "get": {
         "tags": [
           "Resenas"
         ],
-        "summary": "TOP productos por rating & count (agregaciones)",
+        "summary": "TOP products por rating & count (agregaciones)",
         "parameters": [
           {
             "in": "query",

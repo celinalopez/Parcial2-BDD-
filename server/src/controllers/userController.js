@@ -1,160 +1,161 @@
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
-import Cart from '../models/Cart.js'; // para eliminar carrito del user
-import { signToken } from '../utils/jwt.js';
+import Cart from '../models/Cart.js';
 
-// Helpers para respuestas consistentes
 const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
 const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
+const sign = (user) =>
+  jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
 
-export const registerUser = async (req, res, next) => {
+//#region AUTH PUBLICO
+// POST /api/users/register
+export const registerPublic = async (req, res, next) => {
   try {
-    const { name, email, password, phone } = req.body;
-    if (!name || !email || !password) {
-      return fail(res, 'name, email y password son requeridos', 400);
-    }
+    const { name, email, password} = req.body; // se ignora rol
+    if (!name || !email || !password) return fail(res, 'name, email y password son requeridos', 400);
+
     const exists = await User.findOne({ email });
     if (exists) return fail(res, 'Email ya registrado', 409);
 
-    const user = await User.create({ name, email, password, phone });
-    const token = signToken({ id: user._id, role: user.role });
-
-    return ok(res, {
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
-    }, 201);
+    const user = await User.create({ name, email, password, role: 'client' }); // no aceptar rol del body
+    const token = sign(user);
+    ok(res, { user: { id: user._id, name: user.name, email: user.email, role: user.role }, token }, 201);
   } catch (e) { next(e); }
 };
 
-export const loginUser = async (req, res, next) => {
+// POST /api/users/login 
+export const loginPublic = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return fail(res, 'email y password son requeridos', 400);
 
     const user = await User.findOne({ email }).select('+password');
-    if (!user) return fail(res, 'Credenciales invalidas', 401);
+    if (!user) return fail(res, 'Credenciales inválidas', 401);
 
-    const isMatch = await user.matchPassword(password);
-    if (!isMatch) return fail(res, 'Credenciales invalidas', 401);
+    const valid = await user.comparePassword(password);
+    if (!valid) return fail(res, 'Credenciales inválidas', 401);
 
-    const token = signToken({ id: user._id, role: user.role });
-
-    return ok(res, {
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
-    });
+    const token = sign(user);
+    ok(res, { user: { id: user._id, name: user.name, email: user.email, role: user.role }, token });
   } catch (e) { next(e); }
 };
 
-export const getMe = async (req, res, next) => {
+//#region CRUD ADMIN
+
+// GET /api/users  - con filtros $or, $and, $eq, $gte, $lte
+export const listUsers = async (req, res, next) => {
   try {
-    // req.user seteado por protect
-    const user = await User.findById(req.user._id).select('-password');
-    return ok(res, user);
+    const { q, role, createdFrom, createdTo } = req.query;
+    const and = [];
+    if (q) and.push({ $or: [{ name: { $regex: q, $options: 'i' } }, { email: { $regex: q, $options: 'i' } }] });
+    if (role) and.push({ role: { $eq: role } });
+    if (createdFrom || createdTo) {
+      and.push({ createdAt: { ...(createdFrom ? { $gte: new Date(createdFrom) } : {}), ...(createdTo ? { $lte: new Date(createdTo) } : {}) } });
+    }
+    const filter = and.length ? { $and: and } : {};
+    const users = await User.find(filter).sort({ createdAt: -1 });
+    ok(res, users);
   } catch (e) { next(e); }
 };
 
-export const updateMe = async (req, res, next) => {
+// GET /api/users/:id 
+export const getUser = async (req, res, next) => {
   try {
-    const updates = { name: req.body.name, phone: req.body.phone, addresses: req.body.addresses };
-    // si incluye password volvera a hashear por presave
-    const user = await User.findById(req.user._id).select('+password');
-    if (!user) return fail(res, 'Usuario no encontrado', 404);
-
-    if (req.body.name !== undefined) user.name = req.body.name;
-    if (req.body.phone !== undefined) user.phone = req.body.phone;
-    if (req.body.addresses !== undefined) user.addresses = req.body.addresses;
-    if (req.body.password) user.password = req.body.password;
-
-    await user.save();
-    return ok(res, { id: user._id, name: user.name, email: user.email, role: user.role });
+    const u = await User.findById(req.params.id);
+    if (!u) return fail(res, 'user no encontrado', 404);
+    ok(res, u);
   } catch (e) { next(e); }
 };
 
-// ADMIN: listar todos
-export const listUsers = async (_req, res, next) => {
+// POST /api/users 
+export const createUser = async (req, res, next) => {
   try {
-    const users = await User.find().select('-password').sort({ createdAt: -1 });
-    return ok(res, users);
+    const u = await User.create(req.body); 
+    ok(res, u, 201);
   } catch (e) { next(e); }
 };
 
-// ADMIN: eliminar usuario (y su carrito)
+// PATCH /api/users/:id USO $SET 
+export const updateUser = async (req, res, next) => {
+  try {
+    const u = await User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true, runValidators: true });
+    if (!u) return fail(res, 'user no encontrado', 404);
+    ok(res, u);
+  } catch (e) { next(e); }
+};
+
+// DELETE /api/users/:id esto elimina user y su carrito 
 export const deleteUser = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const u = await User.findById(id);
-    if (!u) return fail(res, 'Usuario no encontrado', 404);
-
-    await Cart.deleteMany({ user: id }); // limpia carrito del usuario
-    await User.findByIdAndDelete(id);
-
-    return ok(res, { id }, 200);
+    const u = await User.findByIdAndDelete(req.params.id);
+    if (!u) return fail(res, 'user no encontrado', 404);
+    await Cart.deleteOne({ user: u._id });
+    ok(res, { id: u._id });
   } catch (e) { next(e); }
 };
 
+//#region ADMIN O OWNER
 
-// Obtener un usuario por id (ADMIN)
-export const getUserById = async (req, res, next) => {
-  try {
-    const u = await User.findById(req.params.id).select('-password');
-    if (!u) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-    return res.status(200).json({ success: true, data: u });
-  } catch (e) { next(e); }
-};
-
-// Actualizar usuario por id (ADMIN)
-export const updateUserById = async (req, res, next) => {
-  try {
-    const allowed = ['name', 'email', 'phone', 'role', 'addresses'];
-    const updates = {};
-    for (const k of allowed) if (k in req.body) updates[k] = req.body[k];
-
-    // Si viene password, lo tratamos aparte: usamos findById + save para disparar presave
-    if ('password' in req.body) {
-      const u = await User.findById(req.params.id).select('+password');
-      if (!u) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-      Object.assign(u, updates);
-      u.password = req.body.password;
-      await u.save();
-      return res.status(200).json({
-        success: true,
-        data: { id: u._id, name: u.name, email: u.email, role: u.role }
-      });
-    }
-
-    const u = await User.findByIdAndUpdate(req.params.id, updates, {
-      new: true, runValidators: true, projection: { password: 0 }
-    });
-    if (!u) return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-    return res.status(200).json({ success: true, data: u });
-  } catch (e) { next(e); }
-};
-
-// Buscar usuarios por nombre o email (ADMIN)
-export const searchUsers = async (req, res, next) => {
-  try {
-    const { q } = req.query;
-    const filter = q ? {
-      $and: [
-        { $or: [
-          { name:  { $regex: q, $options: 'i' } },
-          { email: { $regex: q, $options: 'i' } }
-        ] }
-      ]
-    } : {};
-    const users = await User.find(filter).sort({ createdAt: -1 });
-    res.json({ success: true, data: users });
-  } catch (e) { next(e); }
-};
-
+// POST /api/users/me/address -> agrega otra direccion USO DE $PUSH 
 export const addAddress = async (req, res, next) => {
   try {
-    const { address } = req.body; // address: { street, city, state, zip, country }
-    const u = await User.findByIdAndUpdate(
-      req.user._id,
-      { $push: { addresses: address } },
-      { new: true, runValidators: true }
-    );
-    res.json({ success: true, data: u });
+    const { address } = req.body;
+    if (!address) return fail(res, 'address requerido', 400);
+    const u = await User.findByIdAndUpdate(req.user._id, { $push: { addresses: address } }, { new: true, runValidators: true });
+    ok(res, u);
+  } catch (e) { next(e); }
+};
+
+// DELETE /api/users/me/address USO DE $PULL
+export const removeAddress = async (req, res, next) => {
+  try {
+    const { street } = req.body;
+    if (!street) return fail(res, 'street requerido', 400);
+    const u = await User.findByIdAndUpdate(req.user._id, { $pull: { addresses: { street } } }, { new: true });
+    ok(res, u);
+  } catch (e) { next(e); }
+};
+
+// GET /api/users/me
+export const getMe = async (req, res, next) => {
+  try {
+    const me = await User.findById(req.user._id);
+    return res.json({ success: true, data: me });
+  } catch (e) { next(e); }
+};
+
+// PATCH /api/users/me  
+export const updateMe = async (req, res, next) => {
+  try {
+    const allowed = ['name', 'phone', 'email']; 
+    const data = {};
+    for (const k of allowed) if (k in req.body) data[k] = req.body[k];
+
+    const updated = await User.findByIdAndUpdate(req.user._id, { $set: data }, { new: true, runValidators: true });
+    return res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+};
+
+//TO DO: requiere password actual y nuevo
+// PATCH /api/users/me/password 
+export const updateMyPassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: 'currentPassword y newPassword requeridos' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) return res.status(404).json({ success: false, error: 'user no encontrado' });
+
+    const valid = await user.comparePassword(currentPassword);
+    if (!valid) return res.status(401).json({ success: false, error: 'Password actual incorrecto' });
+
+    // Setear y guardar para que dispare pre('save') y hashee
+    user.password = newPassword;
+    await user.save();
+
+    return res.json({ success: true, data: { updated: true } });
   } catch (e) { next(e); }
 };

@@ -1,30 +1,39 @@
 import { Router } from 'express';
 import {
-  createOrderFromCart, listOrders, listOrdersByUser, getOrder,
-  updateOrderStatus, statsByStatus, statsItemsSold
+  createOrderFromCart,
+  listOrders,
+  listOrdersByUser,
+  statsByStatus,
+  updateOrderStatus,
+  getOrder,
+  deleteOrder,
 } from '../controllers/orderController.js';
 import { protect, isAdmin, ownerOrAdmin } from '../middlewares/auth.js';
+import { validateObjectIdParam } from '../middlewares/validators.js';
 
 const router = Router();
 
-// Crear desde carrito (owner o admin)
-router.post('/', protect, createOrderFromCart); // usa req.body.userId o req.user._id
+// ⚠️ rutas fijas primero
+router.get('/stats', protect, isAdmin, statsByStatus);                          // GET    /api/orders/stats
+router.get('/', protect, isAdmin, listOrders);                                  // GET    /api/orders
+router.post('/', protect, createOrderFromCart);                                 // POST   /api/orders
 
-// Listados
-router.get('/', protect, isAdmin, listOrders); // admin
-router.get('/user/:userId', protect, ownerOrAdmin('userId'), listOrdersByUser);
+// por user
+router.get('/user/:userId',
+  protect, ownerOrAdmin('userId'),
+  validateObjectIdParam('userId'),
+  listOrdersByUser
+);                                                                              // GET    /api/orders/user/:userId
 
-// Detalle (owner o admin)
-router.get('/:id', protect, getOrder);
-
-// Cambiar estado (admin)
-router.patch('/:id/status', protect, isAdmin, updateOrderStatus);
-
-// Stats (admin)
-router.get('/stats/summary', protect, isAdmin, statsByStatus);
-
-router.get('/stats', protect, isAdmin, statsByStatus); 
-
-router.get('/stats/items-sold', protect, isAdmin, statsItemsSold);
+// por id (validación de ObjectId por middleware)
+router.get('/:id', protect, validateObjectIdParam('id'), getOrder);             // GET    /api/orders/:id
+router.patch('/:id/status',
+  protect, isAdmin, validateObjectIdParam('id'),
+  updateOrderStatus
+);                                                                              // PATCH  /api/orders/:id/status
+router.delete('/:id',
+  protect, isAdmin, validateObjectIdParam('id'),
+  deleteOrder
+);                                                                              // DELETE /api/orders/:id
 
 export default router;

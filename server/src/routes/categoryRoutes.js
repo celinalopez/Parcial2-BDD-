@@ -1,18 +1,26 @@
 import { Router } from 'express';
 import {
-  createCategory, listCategories, getCategory,
-  updateCategory, deleteCategory, statsProductsByCategory
+  listCategories,
+  createCategory,
+  getCategory,
+  updateCategory,
+  deleteCategory,
+  categoryStats,
 } from '../controllers/categoryController.js';
 import { protect, isAdmin } from '../middlewares/auth.js';
+import { validateObjectIdParam } from '../middlewares/validators.js';
 
 const router = Router();
 
-router.get('/', listCategories);
-router.get('/stats', protect, isAdmin, statsProductsByCategory);
-router.get('/:id', getCategory);
+// públicas
+router.get('/', listCategories);                                     // GET    /api/categories
+// ⚠️ ruta fija ANTES que :id para evitar colisión
+router.get('/stats', protect, isAdmin, categoryStats);               // GET    /api/categories/stats
+router.get('/:id', validateObjectIdParam('id'), getCategory);        // GET    /api/categories/:id
 
-router.post('/', protect, isAdmin, createCategory);
-router.patch('/:id', protect, isAdmin, updateCategory);
-router.delete('/:id', protect, isAdmin, deleteCategory);
+// admin
+router.post('/', protect, isAdmin, createCategory);                  // POST   /api/categories
+router.patch('/:id', protect, isAdmin, validateObjectIdParam('id'), updateCategory);     // PATCH  /api/categories/:id
+router.delete('/:id', protect, isAdmin, validateObjectIdParam('id'), deleteCategory);    // DELETE /api/categories/:id
 
 export default router;

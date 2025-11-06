@@ -70,7 +70,7 @@ npm run dev
 
 - Registro y login devuelven un **token JWT**.
 - Rutas protegidas exigen `Authorization: Bearer <TOKEN>`.
-- Rutas “admin” requieren usuario con `role: "admin"`.
+- Rutas “admin” requieren user con `role: "admin"`.
 
 Ejemplo header:
 ```
@@ -91,126 +91,126 @@ GET /api/health
 
 ---
 
-### 👤 Usuarios — `/api/usuarios`
+### 👤 users — `/api/users`
 
 **Registro**
 ```
-POST /api/usuarios/register
+POST /api/users/register
 Body JSON: { "name":"Celina", "email":"celina@test.com", "password":"123456" }
 ```
 
 **Login**
 ```
-POST /api/usuarios/login
+POST /api/users/login
 Body JSON: { "email":"celina@test.com", "password":"123456" }
 -> data.token (JWT)
 ```
 
 **Mi perfil (autenticado)**
 ```
-GET /api/usuarios/me
+GET /api/users/me
 Headers: Authorization: Bearer <TOKEN>
 ```
 
 **Actualizar mi perfil (autenticado)**
 ```
-PATCH /api/usuarios/me
+PATCH /api/users/me
 Headers: Authorization: Bearer <TOKEN>
 Body JSON: { "phone":"+54 9 11 5555-5555" }
 ```
 
 **Listar (admin)**
 ```
-GET /api/usuarios
+GET /api/users
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
 **Buscar con paginación (admin)**
 ```
-GET /api/usuarios/search?q=cel&page=1&limit=10
+GET /api/users/search?q=cel&page=1&limit=10
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
 **Obtener por id (admin)**
 ```
-GET /api/usuarios/:id
+GET /api/users/:id
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
 **Actualizar por id (admin)**
 ```
-PATCH /api/usuarios/:id
+PATCH /api/users/:id
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 Body JSON: { "role":"admin" }
 ```
 
 **Eliminar por id (admin)**
 ```
-DELETE /api/usuarios/:id
+DELETE /api/users/:id
 Headers: Authorization: Bearer <TOKEN_ADMIN>
-# Elimina también el carrito del usuario
+# Elimina también el cart del user
 ```
 
 ---
 
-### 📂 Categorías — `/api/categorias`
+### 📂 Categorías — `/api/categories`
 
 **Listar (público)**
 ```
-GET /api/categorias
+GET /api/categories
 ```
 
 **Detalle (público)**
 ```
-GET /api/categorias/:id
+GET /api/categories/:id
 ```
 
 **Crear/Actualizar/Eliminar (admin)**
 ```
-POST   /api/categorias
-PATCH  /api/categorias/:id
-DELETE /api/categorias/:id
+POST   /api/categories
+PATCH  /api/categories/:id
+DELETE /api/categories/:id
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 Body JSON (POST/PATCH): { "name":"Notebooks","description":"..." }
 ```
 
-**Stats: productos por categoría (admin)**
+**Stats: products por categoría (admin)**
 ```
-GET /api/categorias/stats
+GET /api/categories/stats
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
 ---
 
-### 📦 Productos — `/api/productos`
+### 📦 Productos — `/api/products`
 
 **Listar (público) con filtros y paginación**
 ```
-GET /api/productos?q=note&brand=lenovo&minPrice=1000&maxPrice=3000&category=<ID>&page=1&limit=10
+GET /api/products?q=note&brand=lenovo&minPrice=1000&maxPrice=3000&category=<ID>&page=1&limit=10
 ```
 
-**Top reseñados / mejor rating (público)**
+**Top reviewdos / mejor rating (público)**
 ```
-GET /api/productos/top?limit=5
+GET /api/products/top?limit=5
 ```
 
 **Detalle (público)**
 ```
-GET /api/productos/:id
+GET /api/products/:id
 ```
 
 **Crear/Actualizar/Eliminar (admin)**
 ```
-POST   /api/productos
-PATCH  /api/productos/:id
-DELETE /api/productos/:id
+POST   /api/products
+PATCH  /api/products/:id
+DELETE /api/products/:id
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 Body JSON (POST): { "name":"Notebook X","brand":"Lenovo","category":"<ID>","price":1500,"stock":10 }
 ```
 
 **Modificar stock (admin)**
 ```
-PATCH /api/productos/:id/stock
+PATCH /api/products/:id/stock
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 Body JSON (dos formas):
 - { "delta": -2 }   # relativo: descuenta 2 del stock actual
@@ -219,83 +219,83 @@ Body JSON (dos formas):
 
 ---
 
-### 🛒 Carrito — `/api/carrito` (owner o admin)
+### 🛒 Carrito — `/api/cart` (owner o admin)
 
-> Todas requieren `Authorization: Bearer <TOKEN>` y ser **dueña del carrito** o **admin**.
+> Todas requieren `Authorization: Bearer <TOKEN>` y ser **dueña del cart** o **admin**.
 
-**Obtener mi carrito**
+**Obtener mi cart**
 ```
-GET /api/carrito/:userId
+GET /api/cart/:userId
 ```
 
 **Totales**
 ```
-GET /api/carrito/:userId/total
+GET /api/cart/:userId/total
 -> { "subtotal": 1234, "itemsCount": 3 }
 ```
 
 **Agregar item**
 ```
-POST /api/carrito/:userId/items
+POST /api/cart/:userId/items
 Body JSON: { "productId":"<ID_PRODUCTO>", "qty":2 }
 ```
 
 **Actualizar cantidad**
 ```
-PATCH /api/carrito/:userId/items/:productId
+PATCH /api/cart/:userId/items/:productId
 Body JSON: { "qty": 3 }   # si qty <= 0 elimina
 ```
 
 **Eliminar item**
 ```
-DELETE /api/carrito/:userId/items/:productId
+DELETE /api/cart/:userId/items/:productId
 ```
 
-**Vaciar carrito**
+**Vaciar cart**
 ```
-DELETE /api/carrito/:userId
+DELETE /api/cart/:userId
 ```
 
 ---
 
-### 🧾 Órdenes — `/api/ordenes`
+### 🧾 Órdenes — `/api/orders`
 
-**Crear desde carrito (owner o admin)**
+**Crear desde cart (owner o admin)**
 ```
-POST /api/ordenes
+POST /api/orders
 Headers: Authorization: Bearer <TOKEN>
-Body: { "userId":"<ID_DEL_USUARIO>", "paymentMethod":"tarjeta" }
+Body: { "userId":"<ID_DEL_user>", "paymentMethod":"tarjeta" }
 ```
-> Descuenta stock, crea la orden con los precios históricos del carrito y vacía el carrito.
+> Descuenta stock, crea la orden con los precios históricos del cart y vacía el cart.
 
 **Listar todas (admin)**
 ```
-GET /api/ordenes
+GET /api/orders
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
-**Listar por usuario (owner o admin)**
+**Listar por user (owner o admin)**
 ```
-GET /api/ordenes/user/:userId
+GET /api/orders/user/:userId
 Headers: Authorization: Bearer <TOKEN> (owner) o <TOKEN_ADMIN>
 ```
 
 **Detalle (owner o admin)**
 ```
-GET /api/ordenes/:id
+GET /api/orders/:id
 Headers: Authorization: Bearer <TOKEN> (owner) o <TOKEN_ADMIN>
 ```
 
 **Cambiar estado (admin)**
 ```
-PATCH /api/ordenes/:id/status
+PATCH /api/orders/:id/status
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 Body JSON: { "status":"paid" }  # pending|paid|shipped|cancelled
 ```
 
 **Stats por estado (admin)**
 ```
-GET /api/ordenes/stats/summary
+GET /api/orders/stats/summary
 Headers: Authorization: Bearer <TOKEN_ADMIN>
 ```
 
@@ -312,45 +312,45 @@ Headers: Authorization: Bearer <TOKEN_ADMIN>
 
 ---
 
-### ⭐ Reseñas — `/api/resenas`
+### ⭐ Reseñas — `/api/reviews`
 
-**Crear reseña (solo si compró)**
+**Crear review (solo si compró)**
 ```
-POST /api/resenas
+POST /api/reviews
 Headers: Authorization: Bearer <TOKEN>
 Body JSON: { "product":"<ID_PRODUCTO>", "rating":5, "comment":"Excelente" }
 ```
 
-**Actualizar mi reseña (owner o admin)**
+**Actualizar mi review (owner o admin)**
 ```
-PATCH /api/resenas/:id
+PATCH /api/reviews/:id
 Headers: Authorization: Bearer <TOKEN>
 Body JSON: { "rating": 4, "comment":"Muy buena" }
 ```
 
-**Eliminar mi reseña (owner o admin)**
+**Eliminar mi review (owner o admin)**
 ```
-DELETE /api/resenas/:id
+DELETE /api/reviews/:id
 Headers: Authorization: Bearer <TOKEN>
 ```
 
-**Listar por producto (público)**
+**Listar por product (público)**
 ```
-GET /api/resenas/product/:productId?page=1&limit=10
+GET /api/reviews/product/:productId?page=1&limit=10
 ```
 
-**Ver mi reseña para un producto**
+**Ver mi review para un product**
 ```
-GET /api/resenas/me/product/:productId
+GET /api/reviews/me/product/:productId
 Headers: Authorization: Bearer <TOKEN>
 ```
 
-**TOP productos por rating & count (agregaciones)**
+**TOP products por rating & count (agregaciones)**
 ```
-GET /api/resenas/top?limit=5
+GET /api/reviews/top?limit=5
 ```
 
-> Cada alta/edición/baja de reseñas recalcula `avgRating` y `ratingsCount` en el `Product`.
+> Cada alta/edición/baja de reviews recalcula `avgRating` y `ratingsCount` en el `Product`.
 
 ---
 
@@ -366,16 +366,16 @@ GET /api/resenas/top?limit=5
 
 **Register → Login → Me**
 ```bash
-curl -X POST http://localhost:4000/api/usuarios/register \
+curl -X POST http://localhost:4000/api/users/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Celina","email":"celina@test.com","password":"123456"}'
 
-curl -X POST http://localhost:4000/api/usuarios/login \
+curl -X POST http://localhost:4000/api/users/login \
   -H "Content-Type: application/json" \
   -d '{"email":"celina@test.com","password":"123456"}'
 
 # usar el token devuelto
-curl http://localhost:4000/api/usuarios/me \
+curl http://localhost:4000/api/users/me \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
