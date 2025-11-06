@@ -1,14 +1,37 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Parcial2-API — Bases de Datos 2",
+    "title": "Parcial2-BDD – API",
     "version": "1.0.0",
-    "description": "API MERN con JWT, CRUDs, validaciones, agregaciones y seed (Yargs + File System)."
+    "description": "API MERN para el Parcial Integrador BDD "
   },
   "servers": [
     {
       "url": "http://localhost:4000",
       "description": "Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Home"
+    },
+    {
+      "name": "Users"
+    },
+    {
+      "name": "Products"
+    },
+    {
+      "name": "Categories"
+    },
+    {
+      "name": "Cart"
+    },
+    {
+      "name": "Orders"
+    },
+    {
+      "name": "Reviews"
     }
   ],
   "components": {
@@ -18,56 +41,333 @@
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
-    }
-  },
-  "tags": [
-    {
-      "name": "Health"
     },
-    {
-      "name": "users"
-    },
-    {
-      "name": "Categorias"
-    },
-    {
-      "name": "Productos"
-    },
-    {
-      "name": "Carrito"
-    },
-    {
-      "name": "Ordenes"
-    },
-    {
-      "name": "Resenas"
-    }
-  ],
-  "paths": {
-    "/api/health": {
-      "get": {
-        "tags": [
-          "Health"
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "street": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "client",
+              "admin"
+            ]
+          },
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        }
+      },
+      "AuthLogin": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
         ],
-        "summary": "Healthcheck",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthRegister": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/User"
+              },
+              "token": {
+                "type": "string"
               }
             }
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "category": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          },
+          "avgRating": {
+            "type": "number"
+          },
+          "ratingsCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "qty": {
+            "type": "integer"
+          },
+          "priceAtAdd": {
+            "type": "number"
+          }
+        }
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "user": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItem"
+            }
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "qty": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          },
+          "subtotal": {
+            "type": "number"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "user": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "paid",
+              "shipped",
+              "cancelled"
+            ]
+          },
+          "paymentMethod": {
+            "type": "string"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "user": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "product": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/Product"
+              }
+            ]
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "PatchStock": {
+        "type": "object",
+        "properties": {
+          "delta": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/home": {
+      "get": {
+        "tags": [
+          "Home"
+        ],
+        "summary": "Health/Home",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -75,45 +375,39 @@
     "/api/users/register": {
       "post": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Registro",
+        "summary": "Registro público",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "email",
-                  "password"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Celina"
-                  },
-                  "email": {
-                    "type": "string",
-                    "example": "celina@test.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 6,
-                    "example": "123456"
-                  }
-                }
+                "$ref": "#/components/schemas/AuthRegister"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Creado"
+            "description": "Creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
           },
           "409": {
-            "description": "Duplicado"
+            "description": "Email ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -121,39 +415,39 @@
     "/api/users/login": {
       "post": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Login",
+        "summary": "Login público",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "example": "celina@test.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "example": "123456"
-                  }
-                }
+                "$ref": "#/components/schemas/AuthLogin"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
           },
           "401": {
-            "description": "Credenciales invalidas"
+            "description": "Credenciales inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -161,9 +455,9 @@
     "/api/users/me": {
       "get": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Perfil propio",
+        "summary": "Obtener mi perfil (owner)",
         "security": [
           {
             "bearerAuth": []
@@ -172,28 +466,76 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "No autorizado"
           }
         }
       },
       "patch": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Actualizar perfil propio",
+        "summary": "Actualizar mi perfil (owner)",
         "security": [
           {
             "bearerAuth": []
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object"
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/me/password": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Cambiar mi password (owner)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string"
+                  }
+                }
               }
             }
           }
@@ -203,7 +545,7 @@
             "description": "OK"
           },
           "401": {
-            "description": "No autorizado"
+            "description": "Password actual incorrecto"
           }
         }
       }
@@ -211,10 +553,9 @@
     "/api/users/me/address": {
       "post": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Agregar una direccion al user autenticado",
-        "description": "Utiliza $push para añadir una direccion al array de direcciones del user.",
+        "summary": "Agregar dirección ($push)",
         "security": [
           {
             "bearerAuth": []
@@ -226,26 +567,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "address"
-                ],
                 "properties": {
                   "address": {
-                    "type": "object",
-                    "properties": {
-                      "street": {
-                        "type": "string",
-                        "example": "Av. Siempre Viva 742"
-                      },
-                      "city": {
-                        "type": "string",
-                        "example": "Springfield"
-                      },
-                      "country": {
-                        "type": "string",
-                        "example": "Argentina"
-                      }
-                    }
+                    "$ref": "#/components/schemas/Address"
                   }
                 }
               }
@@ -254,10 +578,38 @@
         },
         "responses": {
           "200": {
-            "description": "Direccion agregada"
-          },
-          "401": {
-            "description": "No autorizado"
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Eliminar dirección ($pull)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "street": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -265,31 +617,9 @@
     "/api/users": {
       "get": {
         "tags": [
-          "users"
+          "Users"
         ],
-        "summary": "Listar users (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/users/search": {
-      "get": {
-        "tags": [
-          "users"
-        ],
-        "summary": "Buscar users (admin)",
-        "description": "Busca usando $or y $and en name/email.",
+        "summary": "Listar usuarios (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -299,155 +629,33 @@
           {
             "in": "query",
             "name": "q",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "celina"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/categories": {
-      "get": {
-        "tags": [
-          "Categorias"
-        ],
-        "summary": "Listar categories",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Categorias"
-        ],
-        "summary": "Crear category (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Notebooks"
-                  },
-                  "description": {
-                    "type": "string",
-                    "example": "Equipos portatiles"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Creada"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/categories/stats": {
-      "get": {
-        "tags": [
-          "Categorias"
-        ],
-        "summary": "Stats: products por category (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/products": {
-      "get": {
-        "tags": [
-          "Productos"
-        ],
-        "summary": "Listar products (filtros)",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "q",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "brand",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "client",
+                "admin"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "createdFrom",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "minPrice",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "maxPrice",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "category",
+            "name": "createdTo",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
             }
           }
         ],
@@ -459,9 +667,9 @@
       },
       "post": {
         "tags": [
-          "Productos"
+          "Users"
         ],
-        "summary": "Crear product (admin)",
+        "summary": "Crear usuario (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -472,34 +680,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "category",
-                  "price"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Notebook X"
-                  },
-                  "brand": {
-                    "type": "string",
-                    "example": "Lenovo"
-                  },
-                  "category": {
-                    "type": "string",
-                    "example": "66f..."
-                  },
-                  "price": {
-                    "type": "number",
-                    "example": 1500
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "example": 10
-                  }
-                }
+                "$ref": "#/components/schemas/AuthRegister"
               }
             }
           }
@@ -507,70 +688,28 @@
         "responses": {
           "201": {
             "description": "Creado"
-          },
-          "403": {
-            "description": "Admin only"
           }
         }
       }
     },
-    "/api/products/filtro": {
+    "/api/users/{id}": {
       "get": {
         "tags": [
-          "Productos"
+          "Users"
         ],
-        "summary": "Alias de listado de products con filtros",
-        "description": "Devuelve lo mismo que /api/products con query params.",
+        "summary": "Detalle (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "in": "query",
-            "name": "q",
+            "in": "path",
+            "name": "id",
+            "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "brand",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "minPrice",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "maxPrice",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "in": "query",
-            "name": "category",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
             }
           }
         ],
@@ -579,37 +718,12 @@
             "description": "OK"
           }
         }
-      }
-    },
-    "/api/products/top": {
-      "get": {
-        "tags": [
-          "Productos"
-        ],
-        "summary": "Top reviewdos / mejor rating",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 5
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/products/{id}/stock": {
+      },
       "patch": {
         "tags": [
-          "Productos"
+          "Users"
         ],
-        "summary": "Modificar stock (admin)",
+        "summary": "Actualizar (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -630,15 +744,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "delta": {
-                    "type": "integer"
-                  },
-                  "stock": {
-                    "type": "integer"
-                  }
-                }
+                "type": "object"
               }
             }
           }
@@ -646,9 +752,417 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Eliminar (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Listar categorías",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Crear (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Category"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creado"
+          }
+        }
+      }
+    },
+    "/api/categories/stats": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Stats productos por categoría (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Detalle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Actualizar (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Categories"
+        ],
+        "summary": "Eliminar (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Listar productos (lookup categoría)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
           },
-          "403": {
-            "description": "Admin only"
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Crear (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Product"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creado"
+          }
+        }
+      }
+    },
+    "/api/products/filter": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Filtrar por rango y marca",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "brand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "excludeBrand",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minPrice",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxPrice",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/products/top": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Productos más reseñados / rating",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Detalle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Actualizar (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Eliminar (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/products/{id}/stock": {
+      "patch": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Actualizar stock (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchStock"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -656,9 +1170,9 @@
     "/api/cart/{userId}": {
       "get": {
         "tags": [
-          "Carrito"
+          "Cart"
         ],
-        "summary": "Obtener cart (owner/admin)",
+        "summary": "Obtener carrito (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -677,45 +1191,14 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "401": {
-            "description": "No autorizado"
           }
         }
       },
       "delete": {
         "tags": [
-          "Carrito"
+          "Cart"
         ],
-        "summary": "Vaciar cart (owner/admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "userId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/cart/{userId}/total": {
-      "get": {
-        "tags": [
-          "Carrito"
-        ],
-        "summary": "Totales (owner/admin)",
+        "summary": "Vaciar carrito (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -741,9 +1224,9 @@
     "/api/cart/{userId}/items": {
       "post": {
         "tags": [
-          "Carrito"
+          "Cart"
         ],
-        "summary": "Agregar item al cart (owner/admin)",
+        "summary": "Agregar item",
         "security": [
           {
             "bearerAuth": []
@@ -783,10 +1266,7 @@
         },
         "responses": {
           "201": {
-            "description": "Creado"
-          },
-          "401": {
-            "description": "No autorizado"
+            "description": "Agregado"
           }
         }
       }
@@ -794,9 +1274,9 @@
     "/api/cart/{userId}/items/{productId}": {
       "patch": {
         "tags": [
-          "Carrito"
+          "Cart"
         ],
-        "summary": "Actualizar cantidad de item (owner/admin)",
+        "summary": "Actualizar cantidad item",
         "security": [
           {
             "bearerAuth": []
@@ -826,9 +1306,6 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "qty"
-                ],
                 "properties": {
                   "qty": {
                     "type": "integer"
@@ -846,9 +1323,9 @@
       },
       "delete": {
         "tags": [
-          "Carrito"
+          "Cart"
         ],
-        "summary": "Eliminar item del cart (owner/admin)",
+        "summary": "Eliminar item",
         "security": [
           {
             "bearerAuth": []
@@ -879,47 +1356,40 @@
         }
       }
     },
-    "/api/orders": {
-      "post": {
+    "/api/cart/{userId}/total": {
+      "get": {
         "tags": [
-          "Ordenes"
+          "Cart"
         ],
-        "summary": "Crear orden desde cart (owner/admin)",
+        "summary": "Calcular totales",
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "type": "string"
-                  },
-                  "paymentMethod": {
-                    "type": "string",
-                    "example": "tarjeta"
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
-          "201": {
-            "description": "Creada"
+          "200": {
+            "description": "OK"
           }
         }
-      },
+      }
+    },
+    "/api/orders": {
       "get": {
         "tags": [
-          "Ordenes"
+          "Orders"
         ],
-        "summary": "Listar todas (admin)",
+        "summary": "Listar pedidos (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -928,9 +1398,62 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Crear pedido desde carrito (owner)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "paymentMethod"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "paymentMethod": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Creado"
+          }
+        }
+      }
+    },
+    "/api/orders/stats": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Totales por estado (admin)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -938,9 +1461,9 @@
     "/api/orders/user/{userId}": {
       "get": {
         "tags": [
-          "Ordenes"
+          "Orders"
         ],
-        "summary": "Listar orders por user (owner/admin)",
+        "summary": "Pedidos por usuario (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -966,9 +1489,35 @@
     "/api/orders/{id}": {
       "get": {
         "tags": [
-          "Ordenes"
+          "Orders"
         ],
-        "summary": "Detalle de orden (owner/admin)",
+        "summary": "Detalle pedido",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Orders"
+        ],
+        "summary": "Eliminar (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -994,9 +1543,9 @@
     "/api/orders/{id}/status": {
       "patch": {
         "tags": [
-          "Ordenes"
+          "Orders"
         ],
-        "summary": "Cambiar estado (admin)",
+        "summary": "Actualizar estado (admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1018,13 +1567,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "status"
-                ],
                 "properties": {
                   "status": {
                     "type": "string",
-                    "example": "paid"
+                    "enum": [
+                      "pending",
+                      "paid",
+                      "shipped",
+                      "cancelled"
+                    ]
                   }
                 }
               }
@@ -1034,72 +1585,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/orders/stats": {
-      "get": {
-        "tags": [
-          "Ordenes"
-        ],
-        "summary": "Estadisticas por estado (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/orders/stats/summary": {
-      "get": {
-        "tags": [
-          "Ordenes"
-        ],
-        "summary": "Alias de estadisticas por estado (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
-          }
-        }
-      }
-    },
-    "/api/orders/stats/items-sold": {
-      "get": {
-        "tags": [
-          "Ordenes"
-        ],
-        "summary": "Estadisticas de products vendidos ($unwind + $count) (admin)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
           }
         }
       }
@@ -1107,46 +1592,25 @@
     "/api/reviews": {
       "get": {
         "tags": [
-          "Resenas"
+          "Reviews"
         ],
-        "summary": "Listar todas las reviews (admin)",
+        "summary": "Listar todas (admin, populate)",
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "403": {
-            "description": "Admin only"
           }
         }
       },
       "post": {
         "tags": [
-          "Resenas"
+          "Reviews"
         ],
-        "summary": "Crear review (solo si compro)",
+        "summary": "Crear reseña (solo si compró)",
         "security": [
           {
             "bearerAuth": []
@@ -1184,10 +1648,52 @@
             "description": "Creada"
           },
           "403": {
-            "description": "Solo quien compro"
-          },
-          "409": {
-            "description": "Una por user-product"
+            "description": "Usuario no compró el producto"
+          }
+        }
+      }
+    },
+    "/api/reviews/product/{productId}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Reseñas por producto",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/reviews/top": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Top por promedio de calificación",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -1195,9 +1701,9 @@
     "/api/reviews/{id}": {
       "patch": {
         "tags": [
-          "Resenas"
+          "Reviews"
         ],
-        "summary": "Actualizar review (owner/admin)",
+        "summary": "Editar reseña (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1214,7 +1720,7 @@
           }
         ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1239,9 +1745,9 @@
       },
       "delete": {
         "tags": [
-          "Resenas"
+          "Reviews"
         ],
-        "summary": "Eliminar review (owner/admin)",
+        "summary": "Eliminar reseña (owner/admin)",
         "security": [
           {
             "bearerAuth": []
@@ -1254,96 +1760,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/reviews/product/{productId}": {
-      "get": {
-        "tags": [
-          "Resenas"
-        ],
-        "summary": "Listar reviews por product (publico)",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "productId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/reviews/me/product/{productId}": {
-      "get": {
-        "tags": [
-          "Resenas"
-        ],
-        "summary": "Ver mi review para un product (owner)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "productId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/reviews/top": {
-      "get": {
-        "tags": [
-          "Resenas"
-        ],
-        "summary": "TOP products por rating & count (agregaciones)",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 5
             }
           }
         ],
