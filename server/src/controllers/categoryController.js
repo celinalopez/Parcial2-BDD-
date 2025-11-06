@@ -1,8 +1,5 @@
 import Category from '../models/Category.js';
-import Product from '../models/Product.js';
-
-const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
-const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
+import { ok, fail } from '../utils/response.js';
 
 // CRUD 
 export const listCategories = async (_req, res, next) => { try { ok(res, await Category.find().sort({ name: 1 })); } catch (e) { next(e); } };

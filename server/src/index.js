@@ -57,6 +57,7 @@ app.use(
 app.use(notFound);
 app.use(errorHandler);
 
+
 const { PORT = 4000, MONGO_URI } = process.env;
 mongoose.connect(MONGO_URI).then(() => {
   app.listen(PORT, () => console.log(`API on http://localhost:${PORT}`));

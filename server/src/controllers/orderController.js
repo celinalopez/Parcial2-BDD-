@@ -2,9 +2,7 @@ import mongoose from 'mongoose';
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
-
-const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
-const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
+import { ok, fail } from '../utils/response.js';
 
 // POST /api/orders  crear desde carrito  
 export const createOrderFromCart = async (req, res, next) => {

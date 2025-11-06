@@ -2,9 +2,8 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Cart from '../models/Cart.js';
+import { ok, fail } from '../utils/response.js';
 
-const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
-const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
 const sign = (user) =>
   jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
 

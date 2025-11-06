@@ -2,9 +2,7 @@ import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import Review from '../models/Review.js';
-
-const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
-const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
+import { ok, fail } from '../utils/response.js';
 
 // GET /api/products  listar con categorIa USO DE $LOOKUP 
 export const listProducts = async (req, res, next) => {

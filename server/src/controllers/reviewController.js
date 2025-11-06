@@ -2,9 +2,7 @@ import mongoose from 'mongoose';
 import Review from '../models/Review.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
-
-const ok = (res, data, status = 200) => res.status(status).json({ success: true, data });
-const fail = (res, error, status = 400) => res.status(status).json({ success: false, error });
+import { ok, fail } from '../utils/response.js';
 
 // Validar que el user haya comprado el product !!
 const userBoughtProduct = async (userId, productId) => {
